@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в личный кабинет - LogiTech</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .login-section {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            padding: 100px 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+        }
+        
+        .login-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header i {
+            font-size: 3rem;
+            color: #e65100;
+            margin-bottom: 1rem;
+        }
+        
+        .login-header h2 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #1a1a2e;
+        }
+        
+        .form-group label i {
+            margin-right: 8px;
+            color: #e65100;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #e65100;
+            box-shadow: 0 0 0 3px rgba(230, 81, 0, 0.1);
+        }
+        
+        .password-input-wrapper {
+            position: relative;
+        }
+        
+        .password-input-wrapper input {
+            padding-right: 45px;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .forgot-link {
+            color: #e65100;
+            text-decoration: none;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #e65100, #ff6d00);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 81, 0, 0.3);
+        }
+        
+        .demo-credentials {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .demo-credentials p {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .demo-card {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .demo-card code {
+            background: #e9ecef;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-family: monospace;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eef2f7;
+        }
+        
+        .login-footer a {
+            color: #e65100;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-features {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .feature-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
+        .feature-item i {
+            font-size: 2.5rem;
+            color: #e65100;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-item h4 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-item p {
+            color: #666;
+            font-size: 0.875rem;
+        }
+        
+        .notification-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 14px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+        
+        .notification-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification-toast.success {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        }
+        
+        .notification-toast.error {
+            background: linear-gradient(135deg, #c62828, #b71c1c);
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+            }
+            .login-features {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-content">
+                    <div class="logo">
+                        <i class="fas fa-shipping-fast"></i>
+                        <span>LogiTech</span>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="/">Главная</a></li>
+                        <li><a href="/#services">Услуги</a></li>
+                        <li><a href="/tracking">Отследить заказ</a></li>
+                        <li><a href="/account" class="login-link">
+                            <i class="fas fa-user"></i>
+                            Личный кабинет
+                        </a></li>
+                    </ul>
+                    <button class="mobile-menu-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="login-section">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h2>Вход в личный кабинет</h2>
+                        <p>Войдите, чтобы управлять заказами и отслеживать грузы</p>
+                    </div>
+                    
+                    <form id="loginForm" class="login-form">
+                        <div class="form-group">
+                            <label for="email">
+                                <i class="fas fa-envelope"></i>
+                                Email
+                            </label>
+                            <input type="email" id="email" name="email" placeholder="user@example.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">
+                                <i class="fas fa-lock"></i>
+                                Пароль
+                            </label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="password" name="password" placeholder="••••••" required>
+                                <button type="button" id="togglePassword" class="toggle-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="remember">
+                                <span>Запомнить меня</span>
+                            </label>
+                            <a href="/forgot-password" class="forgot-link" id="forgotPasswordLink">
+                                Забыли пароль?
+                            </a>
+                        </div>
+                        
+                        <button type="submit" class="btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Войти
+                        </button>
+                    </form>
+                    
+                    
+                </div>
+                
+                <div class="login-features">
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>Управление заказами</h4>
+                        <p>Создавайте и отслеживайте все ваши перевозки</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <h4>Документы и счета</h4>
+                        <p>Скачивайте накладные и счета в один клик</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bell"></i>
+                        <h4>Мгновенные уведомления</h4>
+                        <p>Будьте в курсе всех изменений статуса</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+ 
+        if (togglePassword) {
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.querySelector('i').classList.toggle('fa-eye');
+                togglePassword.querySelector('i').classList.toggle('fa-eye-slash');
+            });
+        }
+        
+        if (forgotPasswordLink) {
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Forgot password clicked, redirecting...');
+                window.location.href = '/forgot-password';
+            });
+        }
+        
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const remember = document.getElementById('remember').checked;
+                
+                const submitBtn = loginForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
+                
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password, remember })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showNotification('Успешный вход! Перенаправление...', 'success');
+                        setTimeout(() => {
+                            window.location.href = '/account';
+                        }, 1000);
+                    } else {
+                        showNotification(result.message, 'error');
+                        shakeForm();
+                    }
+                } catch (error) {
+                    showNotification('Ошибка при входе', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
+            });
+        }
+        
+        function shakeForm() {
+            const form = document.querySelector('.login-card');
+            form.classList.add('shake');
+            setTimeout(() => form.classList.remove('shake'), 500);
+        }
+        
+        function showNotification(message, type) {
+            let notification = document.querySelector('.notification-toast');
+            if (!notification) {
+                notification = document.createElement('div');
+                notification.className = 'notification-toast';
+                document.body.appendChild(notification);
+            }
+            notification.textContent = message;
+            notification.className = `notification-toast ${type} show`;
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+    </script>
+</body>
+</html>

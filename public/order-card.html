@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточка заказа - LogiTech</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-content">
+                    <div class="logo">
+                        <i class="fas fa-shipping-fast"></i>
+                        <span>LogiTech</span>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="/">Главная</a></li>
+                        <li><a href="/#services">Услуги</a></li>
+                        <li><a href="/tracking" class="active">Отследить заказ</a></li>
+                        <li><a href="/login" class="login-link">
+                            <i class="fas fa-user"></i>
+                            Личный кабинет
+                        </a></li>
+                    </ul>
+                    <button class="mobile-menu-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="page-hero">
+        <div class="container">
+            <div class="page-hero-content">
+                <h1>Карточка <span class="gradient-text">заказа</span></h1>
+                <p>Детальная информация о доставке</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="tracking-section">
+        <div class="container">
+            <div id="ordersContainer" class="orders-container">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Загрузка данных...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const username = window.location.pathname.split('/').pop();
+        
+        async function loadUserOrders() {
+            const container = document.getElementById('ordersContainer');
+            
+            try {
+                const response = await fetch(`/api/user-orders/${username}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    displayOrders(result.data);
+                } else {
+                    container.innerHTML = `
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Заказы не найдены</h3>
+                            <p>Пользователь с логином "${username}" не найден или не имеет заказов</p>
+                            <a href="/tracking" class="btn btn-primary">Вернуться к трекингу</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Ошибка загрузки</h3>
+                        <p>Не удалось загрузить данные о заказах</p>
+                        <a href="/tracking" class="btn btn-primary">Вернуться к трекингу</a>
+                    </div>
+                `;
+            }
+        }
+        
+        function getStatusText(status) {
+            const statusMap = {
+                'in_transit': { text: 'В пути', class: 'status-in-transit', icon: 'fa-truck' },
+                'delivered': { text: 'Доставлен', class: 'status-delivered', icon: 'fa-check-circle' },
+                'pending': { text: 'Ожидает отправки', class: 'status-pending', icon: 'fa-clock' }
+            };
+            return statusMap[status] || { text: status, class: 'status-pending', icon: 'fa-question' };
+        }
+        
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersContainer');
+            
+            const userInfo = orders[0];
+            
+            const ordersHtml = orders.map(order => {
+                const statusInfo = getStatusText(order.status);
+                
+                return `
+                    <div class="order-card-full">
+                        <div class="order-header">
+                            <div class="user-info-section">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div class="user-details">
+                                    <h3>${escapeHtml(order.full_name)}</h3>
+                                    <p><i class="fas fa-envelope"></i> ${escapeHtml(order.email)}</p>
+                                    <p><i class="fas fa-user-tag"></i> Логин: ${escapeHtml(order.username)}</p>
+                                </div>
+                            </div>
+                            <div class="status-badge ${statusInfo.class}">
+                                <i class="fas ${statusInfo.icon}"></i>
+                                ${statusInfo.text}
+                            </div>
+                        </div>
+                        
+                        <div class="tracking-info-grid">
+                            <div class="info-card">
+                                <i class="fas fa-barcode"></i>
+                                <div>
+                                    <label>Трекинг номер</label>
+                                    <p><strong>${escapeHtml(order.tracking_number)}</strong></p>
+                                </div>
+                            </div>
+                            <div class="info-card">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div>
+                                    <label>Откуда</label>
+                                    <p>${escapeHtml(order.from_location)}</p>
+                                </div>
+                            </div>
+                            <div class="info-card">
+                                <i class="fas fa-arrow-right"></i>
+                                <div>
+                                    <label>Куда</label>
+                                    <p>${escapeHtml(order.to_location)}</p>
+                                </div>
+                            </div>
+                            <div class="info-card">
+                                <i class="fas fa-location-dot"></i>
+                                <div>
+                                    <label>Текущее местоположение</label>
+                                    <p>${escapeHtml(order.current_location)}</p>
+                                </div>
+                            </div>
+                            <div class="info-card">
+                                <i class="fas fa-calendar"></i>
+                                <div>
+                                    <label>Ожидаемая дата</label>
+                                    <p>${escapeHtml(order.estimated_delivery)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = `
+                <div class="orders-list">
+                    ${ordersHtml}
+                </div>
+                <div class="back-link">
+                    <a href="/tracking" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Вернуться к поиску
+                    </a>
+                </div>
+            `;
+        }
+        
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        
+        loadUserOrders();
+    </script>
+    
+    <style>
+        .order-card-full {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #eef2f7;
+        }
+        
+        .user-info-section {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .user-avatar i {
+            font-size: 3rem;
+            color: #e65100;
+        }
+        
+        .user-details h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .user-details p {
+            color: #666;
+            font-size: 0.875rem;
+            margin: 4px 0;
+        }
+        
+        .user-details p i {
+            margin-right: 8px;
+            color: #e65100;
+        }
+        
+        .orders-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .loading-spinner i {
+            font-size: 2rem;
+            color: #e65100;
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 20px;
+        }
+        
+        .error-message i {
+            font-size: 3rem;
+            color: #e65100;
+            margin-bottom: 1rem;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .user-info-section {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</body>
+</html>

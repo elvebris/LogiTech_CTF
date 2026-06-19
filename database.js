@@ -1,0 +1,155 @@
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const bcrypt = require('bcryptjs');
+
+const dbPath = path.join(__dirname, 'logitech.db');
+const db = new sqlite3.Database(dbPath);
+
+db.serialize(() => {
+  //заказы
+  db.run(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tracking_number TEXT UNIQUE,
+      username TEXT,
+      status TEXT,
+      full_name TEXT,
+      email TEXT,
+      from_location TEXT,
+      to_location TEXT,
+      current_location TEXT,
+      estimated_date TEXT
+    )
+  `);
+
+  //пользователи
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT UNIQUE,
+      password TEXT,
+      full_name TEXT,
+      role TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  //сброс пароля
+  db.run(`
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT,
+      reset_code TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      expires_at DATETIME,
+      used INTEGER DEFAULT 0
+    )
+  `);
+
+  db.run(`DELETE FROM orders`);
+  db.run(`DELETE FROM users`);
+  db.run(`DELETE FROM password_resets`);
+
+  //заказы
+  const orders = [
+    {
+      tracking_number: 'LOG123456',
+      username: 'ivan_petrov',
+      status: 'in_transit',
+      full_name: 'Иван Петров',
+      email: '1vaaN_Petr@logitech.ru',
+      from_location: 'Москва, Россия',
+      to_location: 'Берлин, Германия',
+      current_location: 'Варшава, Польша',
+      estimated_date: '2026-04-28'
+    },
+    {
+      tracking_number: 'LOG789012',
+      username: 'elena_smirnova',
+      status: 'delivered',
+      full_name: 'Елена Смирнова',
+      email: '3lenAaSmirn0va@logitech.ru',
+      from_location: 'Санкт-Петербург, Россия',
+      to_location: 'Париж, Франция',
+      current_location: 'Париж, Франция',
+      estimated_date: '2026-04-23'
+    },
+    {
+      tracking_number: 'LOG345678',
+      username: 'alex_kozlov',
+      status: 'pending',
+      full_name: 'Алексей Козлов',
+      email: 'KozLOVEaleX@logitech.ru',
+      from_location: 'Новосибирск, Россия',
+      to_location: 'Пекин, Китай',
+      current_location: 'Новосибирск, Россия',
+      estimated_date: '2026-05-05'
+    },
+    {
+      tracking_number: 'LOG901234',
+      username: 'maria_volkova',
+      status: 'in_transit',
+      full_name: 'Мария Волкова',
+      email: 'LadyMaryV0lk0va@logitech.ru',
+      from_location: 'Екатеринбург, Россия',
+      to_location: 'Дубай, ОАЭ',
+      current_location: 'Москва, Россия',
+      estimated_date: '2026-04-30'
+    },
+    {
+      tracking_number: 'LOG567890',
+      username: 'dmitry_sokolov',
+      status: 'delivered',
+      full_name: 'Дмитрий Соколов',
+      email: 'S0koloffDmitry@logitech.ru',
+      from_location: 'Казань, Россия',
+      to_location: 'Стамбул, Турция',
+      current_location: 'Стамбул, Турция',
+      estimated_date: '2026-04-21'
+    }
+  ];
+
+  const insertOrderStmt = db.prepare(`
+    INSERT INTO orders (tracking_number, username, status, full_name, email, from_location, to_location, current_location, estimated_date)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  orders.forEach(order => {
+    insertOrderStmt.run(
+      order.tracking_number,
+      order.username,
+      order.status,
+      order.full_name,
+      order.email,
+      order.from_location,
+      order.to_location,
+      order.current_location,
+      order.estimated_date
+    );
+  });
+
+  insertOrderStmt.finalize();
+
+  const users = [
+    { email: '1vaaN_Petr@logitech.ru', full_name: 'Иван Петров', role: 'user', password: 'am(aP7WzGzV[5^' },
+    { email: '3lenAaSmirn0va@logitech.ru', full_name: 'Елена Смирнова', role: 'user', password: 't^p=eH=,Cam1kQP' },
+    { email: 'KozLOVEaleX@logitech.ru', full_name: 'Алексей Козлов', role: 'user', password: '7?0Cj0Ch1,YW*b' },
+    { email: 'LadyMaryV0lk0va@logitech.ru', full_name: 'Мария Волкова', role: 'user', password: 'qwerty123' },
+    { email: 'S0koloffDmitry@logitech.ru', full_name: 'Дмитрий Соколов', role: 'user', password: '9)9eDrK$eXmy}*$' },
+    { email: 'Alyssia567Administration@logitech.ru', full_name: 'Администратор', role: 'admin', password: 'HMWD%k7=1AY#yonDS~ajbCb;t${?lE' }
+  ];
+
+  const insertUserStmt = db.prepare(`
+    INSERT INTO users (email, password, full_name, role) VALUES (?, ?, ?, ?)
+  `);
+
+  users.forEach(user => {
+    const hashedPassword = bcrypt.hashSync(user.password, 10);
+    insertUserStmt.run(user.email, hashedPassword, user.full_name, user.role);
+  });
+
+  insertUserStmt.finalize();
+  
+});
+
+module.exports = db;

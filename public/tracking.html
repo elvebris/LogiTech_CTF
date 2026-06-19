@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отслеживание груза - LogiTech</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-content">
+                    <div class="logo">
+                        <i class="fas fa-shipping-fast"></i>
+                        <span>LogiTech</span>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="/">Главная</a></li>
+                        <li><a href="/#services">Услуги</a></li>
+                        <li><a href="/tracking" class="active">Отследить заказ</a></li>
+                        <li><a href="/login" class="login-link">
+                            <i class="fas fa-user"></i>
+                            Личный кабинет
+                        </a></li>
+                    </ul>
+                    <button class="mobile-menu-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="page-hero">
+        <div class="container">
+            <div class="page-hero-content">
+                <h1>Отслеживание <span class="gradient-text">груза</span></h1>
+                <p>Введите номер заказа, чтобы узнать актуальный статус доставки</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="tracking-section">
+        <div class="container">
+            <div class="tracking-card">
+                <div class="tracking-form">
+                    <div class="input-group">
+                        <i class="fas fa-box"></i>
+                        <input type="text" id="trackingNumber" placeholder="Введите номер заказа или имя пользователя (например: LOG123456)" class="tracking-input">
+                        <button id="trackBtn" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            Отследить
+                        </button>
+                    </div>
+                  
+                <div id="trackingResult" class="tracking-result" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <script src="/js/tracking.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

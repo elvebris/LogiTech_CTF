@@ -1,0 +1,398 @@
+
+.account-container {
+    padding: 120px 0 60px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+}
+
+.account-container .container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+}
+
+
+.account-sidebar {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+}
+
+.user-profile {
+    text-align: center;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    margin-bottom: 1.5rem;
+}
+
+.user-avatar {
+    font-size: 4rem;
+    color: #e65100;
+    margin-bottom: 1rem;
+}
+
+.user-profile h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.user-profile p {
+    color: #666;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.user-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.user-badge.user {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.user-badge.admin {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.account-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.nav-link:hover {
+    background: #f5f5f5;
+    color: #e65100;
+}
+
+.nav-link.active {
+    background: linear-gradient(135deg, #e65100, #ff6d00);
+    color: white;
+}
+
+.logout-btn {
+    margin-top: 1rem;
+    padding: 12px 16px;
+    background: #ffebee;
+    border: none;
+    border-radius: 12px;
+    color: #c62828;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s;
+}
+
+.logout-btn:hover {
+    background: #ffcdd2;
+}
+
+.account-content {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #eef2f7;
+}
+
+.tab-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.tab-header h2 i {
+    color: #e65100;
+    margin-right: 8px;
+}
+
+.tab-header p {
+    color: #666;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.order-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.order-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.order-number {
+    font-family: monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e65100;
+}
+
+.status-badge-small {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-in-transit {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.status-delivered {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-pending {
+    background: #fff9c4;
+    color: #f57f17;
+}
+
+.order-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.order-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.order-detail i {
+    color: #e65100;
+    width: 20px;
+}
+
+.order-expand {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+    display: none;
+}
+
+.order-card.expanded .order-expand {
+    display: block;
+}
+
+.order-timeline {
+    margin-top: 1rem;
+}
+
+.profile-info {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.info-group {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.info-group label {
+    display: block;
+    font-size: 0.75rem;
+    color: #999;
+    margin-bottom: 0.25rem;
+}
+
+.info-group p {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a1a2e;
+}
+
+.admin-panel {
+    margin-top: 2rem;
+    padding: 2rem 0;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header {
+    margin-bottom: 2rem;
+}
+
+.admin-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.admin-header h2 i {
+    color: #c62828;
+    margin-right: 8px;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #eef2f7;
+}
+
+.admin-tab-btn {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.admin-tab-btn.active {
+    color: #e65100;
+    border-bottom: 2px solid #e65100;
+}
+
+.admin-tab-content {
+    display: none;
+}
+
+.admin-tab-content.active {
+    display: block;
+}
+
+.users-table-container,
+.orders-table-container {
+    overflow-x: auto;
+}
+
+.users-table,
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th,
+.orders-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #eef2f7;
+}
+
+.users-table td,
+.orders-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.status-select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 0.875rem;
+}
+
+.update-status-btn {
+    padding: 4px 12px;
+    background: #e65100;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.update-status-btn:hover {
+    background: #ff6d00;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .account-container .container {
+        grid-template-columns: 1fr;
+    }
+    
+    .account-sidebar {
+        position: static;
+    }
+    
+    .order-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .users-table,
+    .orders-table {
+        font-size: 12px;
+    }
+    
+    .users-table th,
+    .orders-table th,
+    .users-table td,
+    .orders-table td {
+        padding: 8px;
+    }
+}

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат поддержки - LogiTech</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chat-container {
+            padding: 100px 0 40px;
+            min-height: calc(100vh - 80px);
+            background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+        }
+        
+        .chat-wrapper {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 0;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            height: calc(100vh - 140px);
+            min-height: 500px;
+        }
+        
+        .chat-sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #eef2f7;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eef2f7;
+            background: white;
+        }
+        
+        .sidebar-header h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .time-control select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        
+        .rooms-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        
+        .room-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1rem;
+            margin-bottom: 4px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .room-item:hover {
+            background: #e9ecef;
+        }
+        
+        .room-item.active {
+            background: linear-gradient(135deg, #e65100, #ff6d00);
+            color: white;
+        }
+        
+        .room-avatar {
+            width: 40px;
+            height: 40px;
+            background: #e65100;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .room-info {
+            flex: 1;
+        }
+        
+        .room-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .room-email {
+            font-size: 0.7rem;
+            color: #666;
+        }
+        
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eef2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+        }
+        
+        .chat-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .chat-user-info i {
+            font-size: 2rem;
+            color: #e65100;
+        }
+        
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .date-filter input {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.75rem;
+        }
+        
+        .date-filter button {
+            padding: 6px 12px;
+            background: #e65100;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: #fafbfc;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+        }
+        
+        .message.user {
+            text-align: right;
+        }
+        
+        .message-bubble {
+            display: inline-block;
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+        }
+        
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #e65100, #ff6d00);
+            color: white;
+        }
+        
+        .message.admin .message-bubble {
+            background: white;
+            border: 1px solid #eef2f7;
+        }
+        
+        .message-sender {
+            font-size: 0.7rem;
+            margin-bottom: 4px;
+            opacity: 0.7;
+        }
+        
+        .message-text {
+            font-size: 0.875rem;
+            word-wrap: break-word;
+        }
+        
+        .message-text a {
+            color: inherit;
+            text-decoration: underline;
+        }
+        
+        .message-time {
+            font-size: 0.65rem;
+            margin-top: 4px;
+            opacity: 0.6;
+        }
+        
+        .chat-input-area {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #eef2f7;
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+        }
+        
+        .chat-input-area textarea {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-family: inherit;
+            resize: none;
+        }
+        
+        .chat-input-area textarea:focus {
+            outline: none;
+            border-color: #e65100;
+        }
+        
+        .chat-input-area button {
+            padding: 0 1rem;
+            background: linear-gradient(135deg, #e65100, #ff6d00);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .file-upload-btn {
+            background: #666;
+            padding: 0 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .file-upload-btn:hover {
+            background: #555;
+        }
+        
+        .admin-panel {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin: 1rem;
+        }
+        
+        .admin-panel h4 {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .admin-panel input {
+            display: block;
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.75rem;
+        }
+        
+        .admin-panel button {
+            width: 100%;
+            padding: 8px;
+            background: #e65100;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        
+        .empty-chat {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+        
+        .rooms-list::-webkit-scrollbar,
+        .messages-area::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .rooms-list::-webkit-scrollbar-track,
+        .messages-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .rooms-list::-webkit-scrollbar-thumb,
+        .messages-area::-webkit-scrollbar-thumb {
+            background: #e65100;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 768px) {
+            .chat-wrapper {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            .chat-sidebar {
+                max-height: 300px;
+            }
+            .chat-main {
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <div class="container">
+                <div class="nav-content">
+                    <div class="logo">
+                        <i class="fas fa-shipping-fast"></i>
+                        <span>LogiTech</span>
+                    </div>
+                    <ul class="nav-menu">
+                        <li><a href="/">Главная</a></li>
+                        <li><a href="/#services">Услуги</a></li>
+                        <li><a href="/tracking">Отследить заказ</a></li>
+                        <li><a href="/account" class="login-link">
+                            <i class="fas fa-user"></i>
+                            Личный кабинет
+                        </a></li>
+                    </ul>
+                    <button class="mobile-menu-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="chat-container">
+        <div class="container">
+            <div class="chat-wrapper">
+                <div class="chat-sidebar">
+                    <div class="sidebar-header">
+                        <h3><i class="fas fa-comments"></i> Чаты</h3>
+                        <div class="time-control">
+                            <select id="timeBackSelect">
+                                <option value="all">Все сообщения</option>
+                                <option value="1">Последний час</option>
+                                <option value="6">Последние 6 часов</option>
+                                <option value="12">Последние 12 часов</option>
+                                <option value="24">Последние 24 часа</option>
+                                <option value="48">Последние 2 дня</option>
+                                <option value="168">Последняя неделя</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="roomsList" class="rooms-list">
+                        <div class="empty-chat">Загрузка...</div>
+                    </div>
+                    <div id="adminPanel" class="admin-panel" style="display: none;">
+                        <h4>Создать новый чат</h4>
+                        <input type="text" id="newUserEmail" placeholder="Email пользователя">
+                        <input type="text" id="newUserName" placeholder="Имя пользователя">
+                        <button id="createRoomBtn">Создать чат</button>
+                    </div>
+                </div>
+                <div class="chat-main">
+                    <div class="chat-header">
+                        <div class="chat-user-info">
+                            <i class="fas fa-user-circle"></i>
+                            <div>
+                                <h4 id="chatUserName">Выберите чат</h4>
+                            </div>
+                        </div>
+                        <div class="date-filter">
+                            <input type="date" id="dateFrom" placeholder="с">
+                            <input type="date" id="dateTo" placeholder="по">
+                            <button id="applyDateFilter">Применить</button>
+                            <button id="resetDateFilter" style="background: #666;">Сброс</button>
+                        </div>
+                    </div>
+                    <div id="messagesArea" class="messages-area">
+                        <div class="empty-chat">
+                            <i class="fas fa-comment-dots"></i>
+                            <p>Выберите чат для просмотра</p>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <textarea id="messageInput" placeholder="Введите сообщение..." rows="2" disabled></textarea>
+                        <button id="sendBtn" disabled>Отправить</button>
+                        <label class="file-upload-btn" id="fileUploadLabel" style="opacity:0.5; cursor:not-allowed;">
+                            <i class="fas fa-paperclip"></i>
+                            <input type="file" id="fileInput" style="display:none;">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/chat.js"></script>
+</body>
+</html>

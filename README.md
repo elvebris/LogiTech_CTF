@@ -15,3 +15,6 @@ cd LogiTech_CTF
 node app.js
 node admin_bot.js
 ```
+>
+>Ссылка на ВМ:
+>https://drive.google.com/drive/folders/11OyCy-HVPsh23JyCpoh2mHqsa2lzcFUJ?usp=drive_link

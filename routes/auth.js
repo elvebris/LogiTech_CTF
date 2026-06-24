@@ -6,19 +6,18 @@ const multer = require('multer');
 const fs = require('fs');
 const router = express.Router();
 
-//генерация кода
+// генерация кода
 function generateResetCode() {
   return Math.floor(1000 + Math.random() * 9000).toString();
 }
 
-//multer
+// multer
 const uploadDir = path.join(__dirname, '../uploads');
 
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-//файл не проверяется
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, uploadDir)
@@ -29,11 +28,13 @@ const storage = multer.diskStorage({
         cb(null, `${timestamp}_${originalName}`)
     }
 });
-//отсутствие ограничения на размер
+
 const upload = multer({ 
     storage: storage,
     limits: { fileSize: 1024 * 1024 * 100 } 
 });
+
+// ===== ВОССТАНОВЛЕНИЕ ПАРОЛЯ (ОБЫЧНЫЕ ПОЛЬЗОВАТЕЛИ) =====
 
 router.get('/forgot-password', (req, res) => {
   res.sendFile(path.join(__dirname, '../public', 'forgot-password.html'));
@@ -47,7 +48,7 @@ router.get('/reset-password', (req, res) => {
   res.sendFile(path.join(__dirname, '../public', 'reset-password.html'));
 });
 
-//запрос на сброс пароля
+// запрос на сброс пароля (обычные пользователи)
 router.post('/api/forgot-password', (req, res) => {
   const { email } = req.body;
   
@@ -55,6 +56,7 @@ router.post('/api/forgot-password', (req, res) => {
     return res.json({ success: false, message: 'Email обязателен' });
   }
   
+  // Проверяем только в таблице users (обычные пользователи)
   db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
     if (err || !user) {
       return res.json({ success: false, message: 'Пользователь с таким email не найден' });
@@ -83,7 +85,7 @@ router.post('/api/forgot-password', (req, res) => {
   });
 });
 
-//проверка кода и сброс
+// проверка кода и сброс (обычные пользователи)
 router.post('/api/reset-password', (req, res) => {
   const { email, code, newPassword } = req.body;
   
@@ -105,16 +107,13 @@ router.post('/api/reset-password', (req, res) => {
       }
       
       if (!resetRecord) {
-        db.get(`SELECT * FROM password_resets WHERE email = ? ORDER BY id DESC LIMIT 1`, [email], (err, lastCode) => {
-        });
-        
         return res.json({ success: false, message: 'Неверный или просроченный код' });
       }
       
-      
-      //хеширвоание нового пароля
+      // Хеширование нового пароля
       const hashedPassword = bcrypt.hashSync(newPassword, 10);
       
+      // Обновляем пароль в таблице users
       db.run(`UPDATE users SET password = ? WHERE email = ?`, [hashedPassword, email], (err) => {
         if (err) {
           console.error('Error updating password:', err);
@@ -130,6 +129,7 @@ router.post('/api/reset-password', (req, res) => {
   );
 });
 
+// API для получения кода (обычные пользователи)
 router.get('/api/get-reset-code/:email', (req, res) => {
   const { email } = req.params;
   
@@ -145,13 +145,94 @@ router.get('/api/get-reset-code/:email', (req, res) => {
   );
 });
 
+// ===== АДМИНИСТРАТОР (ОТДЕЛЬНЫЕ МАРШРУТЫ) =====
+
+// Запрос на сброс пароля для админа
+router.post('/api/admin/forgot-password', (req, res) => {
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.json({ success: false, message: 'Email обязателен' });
+  }
+  
+  // Проверяем в таблице admins
+  db.get('SELECT * FROM admins WHERE email = ?', [email], (err, admin) => {
+    if (err || !admin) {
+      return res.json({ success: false, message: 'Администратор с таким email не найден' });
+    }
+    
+    const resetCode = generateResetCode();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15);
+    
+    db.run(`DELETE FROM admin_password_resets WHERE email = ?`, [email], (err) => {
+      db.run(
+        `INSERT INTO admin_password_resets (email, reset_code, expires_at, used) VALUES (?, ?, ?, 0)`,
+        [email, resetCode, expiresAt.toISOString()],
+        function(err) {
+          if (err) {
+            console.error('Error inserting admin reset code:', err);
+            return res.json({ success: false, message: 'Ошибка сервера' });
+          }
+          res.json({ 
+            success: true, 
+            message: `Код восстановления отправлен на почту ${email}`
+          });
+        }
+      );
+    });
+  });
+});
+
+// Сброс пароля для админа
+router.post('/api/admin/reset-password', (req, res) => {
+  const { email, code, newPassword } = req.body;
+  
+  console.log(`\n[ADMIN RESET ATTEMPT] Email: ${email}, Code: ${code}`);
+  
+  if (!email || !code || !newPassword) {
+    return res.json({ success: false, message: 'Все поля обязательны' });
+  }
+
+  db.get(
+    `SELECT * FROM admin_password_resets 
+     WHERE email = ? AND reset_code = ? AND expires_at > datetime('now')
+     ORDER BY id DESC LIMIT 1`,
+    [email, code],
+    (err, resetRecord) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.json({ success: false, message: 'Ошибка базы данных' });
+      }
+      
+      if (!resetRecord) {
+        return res.json({ success: false, message: 'Неверный или просроченный код' });
+      }
+      
+      const hashedPassword = bcrypt.hashSync(newPassword, 10);
+      
+      // Обновляем пароль в таблице admins
+      db.run(`UPDATE admins SET password = ? WHERE email = ?`, [hashedPassword, email], (err) => {
+        if (err) {
+          console.error('Error updating admin password:', err);
+          return res.json({ success: false, message: 'Ошибка обновления пароля' });
+        }
+        
+        console.log(`[SUCCESS] Пароль админа для ${email} успешно изменен с кодом ${code}`);
+        res.json({ success: true, message: 'Пароль администратора успешно изменен' });
+      });
+    }
+  );
+});
+
+// ===== ФАЙЛЫ (АДМИН) =====
+
 router.get('/admin/files', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
         return res.status(403).send('Доступ запрещен');
     }
     res.sendFile(path.join(__dirname, '../public', 'admin-files.html'));
 });
-
 
 router.get('/api/admin/files', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
@@ -196,7 +277,6 @@ router.post('/api/admin/upload', upload.single('file'), (req, res) => {
     console.log(`  - Размер: ${uploadedFile.size} bytes`);
     
     if (uploadedFile.originalname.endsWith('.js')) {
-    
         try {
             const fileContent = fs.readFileSync(filePath, 'utf8');
             
@@ -252,7 +332,6 @@ router.delete('/api/admin/files/:filename', (req, res) => {
     const filename = req.params.filename;
     const filePath = path.join(uploadDir, filename);
     
-    //path traversal
     if (filename.includes('..')) {
         console.log(`[!] Попытка path traversal: ${filename}`);
     }
@@ -265,6 +344,8 @@ router.delete('/api/admin/files/:filename', (req, res) => {
     });
 });
 
+// ===== ЛОГИН (ПРОВЕРЯЕТ И USERS, И ADMINS) =====
+
 router.get('/login', (req, res) => {
   if (req.session.user) {
     return res.redirect('/account');
@@ -275,31 +356,60 @@ router.get('/login', (req, res) => {
 router.post('/api/login', (req, res) => {
   const { email, password, remember } = req.body;
   
+  // Сначала проверяем в таблице users (обычные пользователи)
   db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
-    if (err || !user) {
+    if (err) {
       return res.json({ success: false, message: 'Неверный email или пароль' });
     }
     
-    const isValid = await bcrypt.compare(password, user.password);
-    
-    if (!isValid) {
-      return res.json({ success: false, message: 'Неверный email или пароль' });
+    if (user) {
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) {
+        return res.json({ success: false, message: 'Неверный email или пароль' });
+      }
+      
+      req.session.user = {
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role || 'user'
+      };
+      
+      if (remember) {
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      }
+      
+      return res.json({ success: true, role: user.role || 'user' });
     }
     
-    req.session.user = {
-      id: user.id,
-      email: user.email,
-      full_name: user.full_name,
-      role: user.role
-    };
-    
-    if (remember) {
-      req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-    }
-    
-    res.json({ success: true, role: user.role });
+    // Если не найден в users, проверяем в admins
+    db.get('SELECT * FROM admins WHERE email = ?', [email], async (err, admin) => {
+      if (err || !admin) {
+        return res.json({ success: false, message: 'Неверный email или пароль' });
+      }
+      
+      const isValid = await bcrypt.compare(password, admin.password);
+      if (!isValid) {
+        return res.json({ success: false, message: 'Неверный email или пароль' });
+      }
+      
+      req.session.user = {
+        id: admin.id,
+        email: admin.email,
+        full_name: admin.full_name,
+        role: 'admin'
+      };
+      
+      if (remember) {
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+      }
+      
+      res.json({ success: true, role: 'admin' });
+    });
   });
 });
+
+// ===== АККАУНТ И ДРУГИЕ МАРШРУТЫ =====
 
 router.get('/account', (req, res) => {
   if (!req.session.user) {
@@ -327,16 +437,33 @@ router.get('/api/account', (req, res) => {
   });
 });
 
+// ===== АДМИН МАРШРУТЫ =====
+
 router.get('/api/users', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).json({ error: 'Доступ запрещен' });
   }
   
+  // Только обычные пользователи (без админа)
   db.all('SELECT id, email, full_name, role, created_at FROM users', (err, users) => {
     if (err) {
       return res.status(500).json({ error: 'Ошибка базы данных' });
     }
     res.json({ users });
+  });
+});
+
+// Получение списка администраторов (только для админа)
+router.get('/api/admins', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Доступ запрещен' });
+  }
+  
+  db.all('SELECT id, email, full_name, created_at FROM admins', (err, admins) => {
+    if (err) {
+      return res.status(500).json({ error: 'Ошибка базы данных' });
+    }
+    res.json({ admins });
   });
 });
 

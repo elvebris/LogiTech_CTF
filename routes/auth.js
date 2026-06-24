@@ -145,9 +145,7 @@ router.get('/api/get-reset-code/:email', (req, res) => {
   );
 });
 
-// ===== АДМИНИСТРАТОР (ОТДЕЛЬНЫЕ МАРШРУТЫ) =====
 
-// Запрос на сброс пароля для админа
 router.post('/api/admin/forgot-password', (req, res) => {
   const { email } = req.body;
   
@@ -184,7 +182,6 @@ router.post('/api/admin/forgot-password', (req, res) => {
   });
 });
 
-// Сброс пароля для админа
 router.post('/api/admin/reset-password', (req, res) => {
   const { email, code, newPassword } = req.body;
   
@@ -211,7 +208,6 @@ router.post('/api/admin/reset-password', (req, res) => {
       
       const hashedPassword = bcrypt.hashSync(newPassword, 10);
       
-      // Обновляем пароль в таблице admins
       db.run(`UPDATE admins SET password = ? WHERE email = ?`, [hashedPassword, email], (err) => {
         if (err) {
           console.error('Error updating admin password:', err);
@@ -225,7 +221,6 @@ router.post('/api/admin/reset-password', (req, res) => {
   );
 });
 
-// ===== ФАЙЛЫ (АДМИН) =====
 
 router.get('/admin/files', (req, res) => {
     if (!req.session.user || req.session.user.role !== 'admin') {
@@ -344,7 +339,6 @@ router.delete('/api/admin/files/:filename', (req, res) => {
     });
 });
 
-// ===== ЛОГИН (ПРОВЕРЯЕТ И USERS, И ADMINS) =====
 
 router.get('/login', (req, res) => {
   if (req.session.user) {
@@ -355,8 +349,7 @@ router.get('/login', (req, res) => {
 
 router.post('/api/login', (req, res) => {
   const { email, password, remember } = req.body;
-  
-  // Сначала проверяем в таблице users (обычные пользователи)
+
   db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
     if (err) {
       return res.json({ success: false, message: 'Неверный email или пароль' });
@@ -382,7 +375,6 @@ router.post('/api/login', (req, res) => {
       return res.json({ success: true, role: user.role || 'user' });
     }
     
-    // Если не найден в users, проверяем в admins
     db.get('SELECT * FROM admins WHERE email = ?', [email], async (err, admin) => {
       if (err || !admin) {
         return res.json({ success: false, message: 'Неверный email или пароль' });
@@ -409,7 +401,6 @@ router.post('/api/login', (req, res) => {
   });
 });
 
-// ===== АККАУНТ И ДРУГИЕ МАРШРУТЫ =====
 
 router.get('/account', (req, res) => {
   if (!req.session.user) {
@@ -437,14 +428,12 @@ router.get('/api/account', (req, res) => {
   });
 });
 
-// ===== АДМИН МАРШРУТЫ =====
 
 router.get('/api/users', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).json({ error: 'Доступ запрещен' });
   }
   
-  // Только обычные пользователи (без админа)
   db.all('SELECT id, email, full_name, role, created_at FROM users', (err, users) => {
     if (err) {
       return res.status(500).json({ error: 'Ошибка базы данных' });
@@ -453,7 +442,6 @@ router.get('/api/users', (req, res) => {
   });
 });
 
-// Получение списка администраторов (только для админа)
 router.get('/api/admins', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') {
     return res.status(403).json({ error: 'Доступ запрещен' });
